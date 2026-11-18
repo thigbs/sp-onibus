@@ -10,6 +10,7 @@ import BuscarScreen from './screens/BuscarScreen';
 import FavoritosScreen from './screens/FavoritosScreen';
 import LinhaScreen from './screens/LinhaScreen';
 import ParadaScreen from './screens/ParadaScreen';
+import SobreScreen from './screens/SobreScreen';
 import { cores } from './theme';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -44,6 +45,13 @@ function Abas() {
         component={FavoritosScreen}
         options={{
           tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>★</Text>,
+        }}
+      />
+      <Tabs.Screen
+        name="Sobre"
+        component={SobreScreen}
+        options={{
+          tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>ℹ︎</Text>,
         }}
       />
     </Tabs.Navigator>
