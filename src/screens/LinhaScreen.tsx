@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 
 import { api, destino, letreiro, type Parada, type Veiculo } from '../api';
@@ -27,6 +27,7 @@ export default function LinhaScreen({ route, navigation }: TelaProps<'Linha'>) {
   const [favorita, setFavorita] = useState(false);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
+  const [atualizando, setAtualizando] = useState(false);
 
   // Estrela de favorito no cabeçalho
   useLayoutEffect(() => {
@@ -121,11 +122,30 @@ export default function LinhaScreen({ route, navigation }: TelaProps<'Linha'>) {
       </MapView>
 
       <View style={s.resumo}>
-        <Text style={estilos.destino}>→ {destino(linha)}</Text>
-        <Text style={estilos.sub}>
-          {onibus.length} ônibus em circulação
-          {hora ? ` · atualizado às ${hora}` : ''}
-        </Text>
+        <View style={{ flex: 1 }}>
+          <Text style={estilos.destino}>→ {destino(linha)}</Text>
+          <Text style={estilos.sub}>
+            {onibus.length} ônibus em circulação
+            {hora ? ` · atualizado às ${hora}` : ''}
+          </Text>
+        </View>
+        <Pressable
+          onPress={async () => {
+            setAtualizando(true);
+            await atualizarOnibus();
+            setAtualizando(false);
+          }}
+          disabled={atualizando}
+          style={({ pressed }) => [s.botaoAtualizar, (pressed || atualizando) && { opacity: 0.6 }]}
+          accessibilityRole="button"
+          accessibilityLabel="Atualizar posição dos ônibus"
+        >
+          {atualizando ? (
+            <ActivityIndicator color="#fff" size="small" />
+          ) : (
+            <Text style={s.botaoAtualizarTexto}>↻ Atualizar</Text>
+          )}
+        </Pressable>
       </View>
 
       <FlatList
@@ -171,11 +191,23 @@ export default function LinhaScreen({ route, navigation }: TelaProps<'Linha'>) {
 const s = StyleSheet.create({
   mapa: { height: 280 },
   resumo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: espaco.m,
     backgroundColor: cores.cartao,
     padding: espaco.g,
     borderBottomWidth: 1,
     borderColor: cores.borda,
   },
+  botaoAtualizar: {
+    backgroundColor: cores.primaria,
+    borderRadius: 10,
+    paddingHorizontal: espaco.m,
+    paddingVertical: espaco.p,
+    minWidth: 104,
+    alignItems: 'center',
+  },
+  botaoAtualizarTexto: { color: '#fff', fontWeight: '600' },
   onibus: {
     backgroundColor: '#fff',
     borderRadius: 16,
